@@ -1,9 +1,9 @@
 # coding:utf-8
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, BooleanField, SelectField
-from wtforms.validators import DataRequired, Length, Required, Email, Regexp
+from wtforms.validators import DataRequired, Length, Required, Email, Regexp, ValidationError
 
-from app.models import Role
+from app.models import Role, User
 
 class NameForm(FlaskForm):
     name = StringField("What's your name", validators=[DataRequired()])
@@ -32,5 +32,11 @@ class EditProfileAdminForm(FlaskForm):
         self.role.choices = [(role.id, role.name) for role in Role.query.filter_by(Role.name).all()]
         self.user = user
 
-    def validate_email(self):
+    def validate_email(self, field):
+        if field.data != self.user.email and User.query.filter_by(email=field.data).first():
+            raise ValidationError('Email already registered.')
+
+    def vaildate_username(self, field):
+        if field.data != self.user.username and User.query.filter_by(username=field.data).first():
+            raise ValidationError('Username already registered.')
 

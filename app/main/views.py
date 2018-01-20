@@ -4,7 +4,7 @@ from flask import render_template, session, redirect, url_for, abort, flash
 from flask_login import login_required, current_user
 
 from . import main
-from .forms import NameForm, EditProfileForm
+from .forms import NameForm, EditProfileForm, EditProfileAdminForm
 from app.decorators import admin_required, permission_required
 from app.models import Permission
 from .. import db
@@ -98,3 +98,11 @@ def edit_profile():
     form.location.data = current_user.location
     form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', form=form)
+
+
+@main.route('/edit-profile/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_profile_admin(id):
+    user = User.query.get_or_404(id)
+    form = EditProfileAdminForm(user=user)
