@@ -4,21 +4,31 @@ from flask import render_template, session, redirect, url_for, abort, flash
 from flask_login import login_required, current_user
 
 from . import main
-from .forms import NameForm, EditProfileForm, EditProfileAdminForm
+from .forms import NameForm, EditProfileForm, EditProfileAdminForm, PostForm
 from app.decorators import admin_required, permission_required
 from app.models import Permission
 from .. import db
-from app.models import User, Role
+from app.models import User, Role, Post
 
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    form = NameForm()
-    if form.validate_on_submit():
+
+    form1 = NameForm()
+    if form1.validate_on_submit():
         return redirect(url_for('main.index'))
-    return render_template('index.html', form=form, name=session.get('name'),
+    '''
+    return render_template('index.html', form1=form1, name=session.get('name'),
                            know=session.get('know', False),
                            current_time=datetime.utcnow())
+                           '''
+    form = PostForm()
+    if current_user.can(Permission.WRITE_ARTICLES) and form.validate_on_submit():
+        post = Post(body=form.body.data, author=current_user._get_current_object())
+        db.session.add(post)
+        return redirect(url_for('.index'))
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template('index.html', form=form, posts=posts, form1=form1, name=session.get('name'), know=session.get('know', False), current_time=datetime.utcnow())
 
 """
 @app.route('/', methods=['GET', 'POST'])
