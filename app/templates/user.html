@@ -26,6 +26,10 @@
             <a href="mailto:{{ user.email }}">{{ user.email }}</a>
         </p>
         {% endif %}
+
+        <h3>Posts by{{ user.username }}</h3>
+        {% include '_posts.html' %}
+
         {% if user.about_me %}
         <p>
             {{ user.about_me }}
