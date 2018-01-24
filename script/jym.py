@@ -64,13 +64,13 @@ def get_datas(goods):
         good_price = good.find('span', attrs={'class': 'price'}).string
         print('good_id:{good_id}, good_name: {good_name}, good_url: {good_url}, good_price: {good_price}'.format(good_price=good_price, good_name=good_name,
                                                                                                                  good_id=good_id, good_url=good_url))
-        write_db(good_name, good_id, good_url, float(good_price))
+        write_db(good_name, good_id, good_url, float(good_price), '交易猫')
 
 
-def write_db(good_name, good_id, good_url, good_price):
+def write_db(good_name, good_id, good_url, good_price, source):
     with connection.cursor() as cursor:
-        sql = 'insert into fate_mh_goods (good_name, good_url, good_id, good_price ) values (%s, %s, %s, %s)'
-        cursor.execute(sql, (good_name, good_url, good_id, good_price))
+        sql = 'insert into fate_mh_goods (good_name, good_url, good_id, good_price, source) values (%s, %s, %s, %s, %s)'
+        cursor.execute(sql, (good_name, good_url, good_id, good_price, source))
         connection.commit()
 
 
