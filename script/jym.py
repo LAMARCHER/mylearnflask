@@ -69,8 +69,14 @@ def get_datas(goods):
 
 def write_db(good_name, good_id, good_url, good_price, source):
     with connection.cursor() as cursor:
-        sql = 'insert into fate_mh_goods (good_name, good_url, good_id, good_price, source) values (%s, %s, %s, %s, %s)'
-        cursor.execute(sql, (good_name, good_url, good_id, good_price, source))
+        selectsql = 'select * from fate_mh_goods where good_id=%s;'
+        insertsql = 'insert into fate_mh_goods (good_name, good_url, good_id, good_price, source) values (%s, %s, %s, %s, %s);'
+        updatesql = 'update fate_mh_goods set good_name=%s, good_url=%s, good_price=%s where good_id=%s;'
+        cursor.execute(selectsql, (good_id,))
+        if (cursor.fetchone()):
+            cursor.execute(updatesql, (good_name, good_url, good_price, good_id))
+        else:
+            cursor.execute(insertsql, (good_name, good_url, good_id, good_price, source))
         connection.commit()
 
 
