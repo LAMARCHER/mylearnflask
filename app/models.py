@@ -12,6 +12,20 @@ import bleach
 from app import db
 from . import login_manager
 
+'''
+registrations = db.Table('registrations',
+                         db.Column('student_id', db.Integer, db.ForeignKey('students.id')),
+                         db.Column('class_id', db.Integer, db.ForeignKey('class.id'))
+)
+'''
+
+
+class Follow(db.Model):
+    __tablename__ = 'follows'
+    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    followed_id = db.Column(db.Integer, db.ForeignKey('user.id'), prmary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 class Permission:
     FOLLOW = 0x01
@@ -98,6 +112,9 @@ class User(UserMixin, db.Model):
     last_seen = db.Column(db.DateTime(), default=datetime.datetime.utcnow)
     avatar_hash = db.Column(db.String(32))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+
+    followed = db.relationship('Follow', foreign_keys=[Follow.followed_id], backref=db.backref('follower', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
+    follower = db.relationship('Follow', foreign_keys=[Follow.follower_id], backref=db.backref('followed', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan' )
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -187,6 +204,22 @@ class User(UserMixin, db.Model):
                 db.session.commit()
             except IntegrityError:
                 db.session.rollback()
+
+    def follow(self, user):
+        if not self.is_following(user):
+            f = Follow(follower=self, followed=user)
+            db.session.add(f)
+
+    def unfollow(self, user):
+        f = self.followed.filter_by(followed_id=user.id).first()
+        if f:
+            db.session.delete(f)
+
+    def is_following(self, user):
+        return self.followed.filter_by(followed_id=user.id).first() is not None
+
+    def is_followed_by(self, user):
+        return self.follower.filter_by(follower_id=user.id).first() is not None
 
 
 class AnonymousUser(AnonymousUserMixin):

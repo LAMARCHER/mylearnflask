@@ -3,6 +3,7 @@
 {{ super() }}
 <link rel="shortcut icon" href="{{ url_for('static', filename='rose.jpg')}}" type="image/x-icon">
 <link rel="icon" href="{{ url_for('static', filename='rose.jpg') }}" type="image/x-icon">
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 {% block  title %} Flasky {% endblock %}
 {% endblock %}
 
